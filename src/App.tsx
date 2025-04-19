@@ -67,7 +67,7 @@ function App() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 space-y-6 mx-auto">
         <audio ref={tickSoundRef} src="/sounds/tick.mp3" preload="auto" />
         <audio ref={bellSoundRef} src="/sounds/bell.mp3" preload="auto" />
-        <img src="/src/assets/logo.png" alt="Логотип" className="w-24 mx-auto mb-6" />
+        <img src="/images/logo.png" alt="Логотип" className="w-24 mx-auto mb-6" />
 
         {step === 'start' && (
           <div className="space-y-4 text-center">

@@ -147,7 +147,7 @@ function App() {
                   onClick={() => { setCups(num); setGrams(num === 1 ? 10 : 20); setStep('filter_slider'); }}
                   className={`px-4 py-2 rounded-lg font-semibold ${cups === num ? 'bg-[#9c6644] text-white' : 'bg-gray-200'}`}
                 >
-                  {num} чашка{num > 1 ? 'и' : ''}
+                  {num} {num === 1 ? 'чашка' : 'чашки'}
                 </button>
               ))}
             </div>

@@ -64,7 +64,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fefae0] to-[#faedcd] flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 space-y-6 mx-auto">
+      <div className="w-full max-w-md bg-white text-[#432818] rounded-2xl shadow-xl p-6 space-y-6 mx-auto">
         <audio ref={tickSoundRef} src="/sounds/tick.mp3" preload="auto" />
         <audio ref={bellSoundRef} src="/sounds/bell.mp3" preload="auto" />
         <img src="/images/logo.png" alt="Логотип" className="w-24 mx-auto mb-6" />

@@ -15,6 +15,10 @@ function App() {
   const bellSoundRef = useRef<HTMLAudioElement | null>(null);
 
   const reset = () => {
+    if (tickSoundRef.current) {
+      tickSoundRef.current.pause();
+      tickSoundRef.current.currentTime = 0;
+    }
     setStep('start');
     setShot('');
     setGrams(20);
@@ -30,12 +34,17 @@ function App() {
     if (tickSoundRef.current?.canPlayType('audio/mpeg')) {
       tickSoundRef.current?.play().catch(() => { });
     }
-    const id = setInterval(() => {
+    let id = setInterval(() => {
       setTimer((t) => {
         if (t <= 1) {
           clearInterval(id);
+          id = 0;
           setRunning(false);
           setFinished(true);
+          if (tickSoundRef.current) {
+            tickSoundRef.current.pause();
+            tickSoundRef.current.currentTime = 0;
+          }
           if (bellSoundRef.current?.canPlayType('audio/mpeg')) {
             bellSoundRef.current?.play().catch(() => { });
           }
@@ -47,7 +56,9 @@ function App() {
         return t - 1;
       });
     }, 1000);
-    return () => clearInterval(id);
+    return () => {
+      if (id) clearInterval(id);
+    };
   }, [running, timer]);
 
   const renderProgressBar = () => (
@@ -63,7 +74,7 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fefae0] to-[#faedcd] flex items-center justify-center px-4 py-10">
+    <div className="h-screen bg-gradient-to-b from-[#fefae0] to-[#faedcd] flex items-center justify-center px-4 py-4">
       <div className="w-full max-w-md bg-white text-[#432818] rounded-2xl shadow-xl p-6 space-y-6 mx-auto">
         <audio ref={tickSoundRef} src="/sounds/tick.mp3" preload="auto" />
         <audio ref={bellSoundRef} src="/sounds/bell.mp3" preload="auto" />
@@ -83,6 +94,7 @@ function App() {
         {step === 'espresso_shot' && (
           <div className="space-y-4 text-center">
             <h2 className="text-lg font-semibold text-[#432818]">Какой объём?</h2>
+            <p>Лучше всегда готовить кофе в двойной корзине, так как в ней экстракция стабильнее и равномернее, за счет более ровного строения сетки</p>
             <button onClick={() => { setShot('single'); setStep('espresso_instruction'); }} className="w-full bg-[#7f5539] hover:bg-[#9c6644] text-white font-semibold py-2 rounded-lg transition">Одиночный шот</button>
             <button onClick={() => { setShot('double'); setStep('espresso_instruction'); }} className="w-full bg-[#7f5539] hover:bg-[#9c6644] text-white font-semibold py-2 rounded-lg transition">Двойной шот</button>
           </div>
@@ -90,16 +102,43 @@ function App() {
 
         {step === 'espresso_instruction' && (
           <div className="space-y-4 text-center">
-            <p>Возьмите {shot === 'single' ? 9 : 18} грамм молотого кофе и утрамбуйте</p>
+            <p>Возьмите {shot === 'single' ? 9 : 18} грамм молотого кофе и проведите темперовку</p>
+
             {!running && !finished && (
-              <button onClick={() => { setTimer(30); setInitialTimer(30); setRunning(true); }} className="w-full bg-[#7f5539] hover:bg-[#9c6644] text-white font-semibold py-2 rounded-lg transition">Начать</button>
+              <>
+                {shot === 'single' && (
+                  <p className="text-sm text-left">
+                    Если это первый шот на сегодня — рекомендуется смолоть перед приготовлением дополнительные 4–5 грамм кофе на выброс для того, чтобы из каналов кофемолки вышел старый, окисленный молотый кофе, который неизбежно остается после каждого приготовления.
+                  </p>
+                )}
+                {shot === 'double' && (
+                  <p className="text-sm text-left">
+                    Закладка зависит от свежести кофейного зерна. Если у вас кофе стоит больше месяца, то стоит начать от 19 грамм и выше.
+                    <br /><br />Проведите темперовку.
+                    <br /><br />Расстояние от дисперсионной сетки на внутренней части кофейной группы до таблетки с кофе после темперовки должно равняться 3–4 мм.
+                    <br /><br />Вставьте холдер с кофе после темперовки в кофейную группу и достаньте обратно — кофейная таблетка должна выглядеть без изменений и не иметь в себе выраженных дефектов. На кофемашинах, где дисперсионная сетка крепится винтом, на таблетке кофе должна остаться небольшая ямка от этого винта.
+                  </p>
+                )}
+                <button onClick={() => { setTimer(30); setInitialTimer(30); setRunning(true); }} className="w-full bg-[#7f5539] hover:bg-[#9c6644] text-white font-semibold py-2 rounded-lg transition">Всё готово</button>
+              </>
             )}
+
             {running && timer > 0 && (
               <>
+                <div className="flex justify-center">
+                  <video
+                    src={shot === 'single' ? '/video/single-shot.mp4' : '/video/double-shot.mp4'}
+                    autoPlay
+                    muted
+                    loop
+                    className="max-h-[50vh] object-cover rounded-lg shadow"
+                  />
+                </div>
                 <p>Заваривание... Осталось {timer} секунд</p>
                 {renderProgressBar()}
               </>
             )}
+
             {!running && finished && (
               <>
                 <p>Напиток готов.</p>
@@ -133,6 +172,7 @@ function App() {
         {step === 'coldbrew_instruction' && (
           <div className="space-y-4 text-center">
             <p>Залейте бутылку водой, взболтайте аккуратно круговыми движениями. Уберите в холодильник на 8 часов.</p>
+            <img src="/images/hario.webp" alt="Hario" className="w-full rounded-lg shadow" />
             <button onClick={reset} className="w-full bg-gray-200 py-2 rounded">Начать сначала</button>
           </div>
         )}
@@ -189,7 +229,17 @@ function App() {
             <p>Медленно круговыми движениями от центра к краям вливайте воду по 100 мл и делайте паузы.</p>
             <p>К концу таймера вся вода должна оказаться в сервировочном чайнике (допустимы отклонения).</p>
             {timer > 0 && (
+
               <>
+                <div className="flex justify-center">
+                  <video
+                    src="/video/hario.mp4"
+                    autoPlay
+                    muted
+                    loop
+                    className="max-h-[50vh] object-cover rounded-lg shadow"
+                  />
+                </div>
                 <p>Осталось {timer} секунд</p>
                 {renderProgressBar()}
               </>

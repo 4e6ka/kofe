@@ -34,11 +34,11 @@ function App() {
     if (tickSoundRef.current?.canPlayType('audio/mpeg')) {
       tickSoundRef.current?.play().catch(() => { });
     }
-    let id = setInterval(() => {
+    let id: NodeJS.Timeout = setInterval(() => {
       setTimer((t) => {
         if (t <= 1) {
           clearInterval(id);
-          id = 0;
+          id = 0 as unknown as NodeJS.Timeout;
           setRunning(false);
           setFinished(true);
           if (tickSoundRef.current) {
